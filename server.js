@@ -20,11 +20,7 @@ app.get('*', (req,res,next)=>{
 })
 
 function errorHandler(err, req,res,next){
-  if(!err.statusCode){
-    err.statusCode = 500;
-  }
-
-  res.sendStatus(err.StatusCode).json(err);
+  res.send(`Error: ${err}`);
 }
 
 
