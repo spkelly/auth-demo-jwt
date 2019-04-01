@@ -3,6 +3,9 @@ var router = express.Router();
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var knex = require('../knex');
+var tokenMiddleware = require('../middleware/token');
+
+
 router.post('/login', (req, res, next)=>{
 
   setTimeout(()=>{
@@ -16,11 +19,20 @@ router.post('/login', (req, res, next)=>{
     .select(['user_id', 'hash'])
     .then((data)=>{
       if(data.length > 0){
-        const token = jwt.sign({
-          user_id: data[0].user_id},
-          process.env.JWT_SECRET, {}
-        );
-        res.json({_token:token});
+        bcrypt.compare(password, data[0].hash)
+        .then((isValid)=>{
+          if(isValid){
+            const token = jwt.sign({
+              user_id: data[0].user_id},
+              process.env.JWT_SECRET, {}
+            );
+            res.json({_token:token});
+          }
+          else{
+            const errorMessage = 'Username or Password is invalid';
+            next(errorMessage);
+          }
+        });
       }
       else{
         const errorMessage = 'Username or Password is invalid';
@@ -42,9 +54,19 @@ router.get('/logout', (req, res, next)=>{
   res.send('logout endpoint');
 });
 
-// TODO: Write JWT token middleware to access protected endpoints
-router.get('/profile', (req, res, next)=>{
-  res.send('profile endpoint');
+
+router.get('/profile', tokenMiddleware.verifyJWT, (req, res, next)=>{
+  let profile = res.locals.tokenInfo;
+  
+  if(!profile.user_id){
+    next('there was a problem accessing your profile');
+  }
+  knex('users').select(['display_name', 'image_url']).then((data)=>{
+    res.json(data);
+  })
+  .catch(err=>{
+    console.log(err);
+  })
 });
 
 
