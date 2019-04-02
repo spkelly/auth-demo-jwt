@@ -24,6 +24,7 @@ app.get('*', (req, res, next)=>{
 })
 
 function errorHandler(err, req, res, next){
+  console.log(err);
   res.json({err});
 }
 
