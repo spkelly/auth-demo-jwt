@@ -5,6 +5,7 @@ var bcrypt = require('bcryptjs');
 var knex = require('../knex');
 var tokenMiddleware = require('../middleware/token');
 var errorMessages = require('../helpers/error').messages;
+var isUserValid = require('../helpers/userHelpers').isUserValid;
 
 router.post('/login', (req, res, next)=>{
 
@@ -49,6 +50,39 @@ router.post('/login', (req, res, next)=>{
     });
   }, 1000);
 });
+
+router.post('/signup',async (req, res, next)=>{
+  let userData = req.body;
+  if(isUserValid(userData)){
+    let hash = await bcrypt.hash(userData.password,10)
+    .catch((err)=>{
+      res.send('an error has occured');
+    });
+    if(hash){
+      knex('users',)
+      .returning('user_id')
+      .insert({
+        'email': userData.email,
+        'hash': hash,
+        'image_url': userData.imageUrl,
+        'display_name': userData.displayName
+      })
+      .then((data)=>{
+        console.log(data);
+        res.locals.tokenInfo = {
+          userId:data[0]
+        }
+        next();
+      })
+      .catch(err=>{
+        next(err);
+      })
+    }
+  }
+
+  // res.send('hello');
+}, tokenMiddleware.signAndSendToken);
+
 
 
 
