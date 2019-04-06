@@ -3,6 +3,7 @@ require('dotenv').config();
 var express = require('express');
 var bodyParser = require('body-parser');
 var userRoutes = require('./routes/user');
+var morgan = require('morgan');
 const path = require('path');
 const app = express();
 const port = process.env.PORT || 3001;
@@ -10,7 +11,9 @@ const port = process.env.PORT || 3001;
 app.set('view engine', 'pug');
 app.set('x-powered-by', false);
 app.set('views', path.resolve(__dirname, 'views'));
+
 app.use(bodyParser.json());
+app.use(morgan('common'));
 app.all('/*', (req, res, next) =>{
   res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
   res.header('Access-Control-Allow-Headers', ['Content-Type', 'Authorization']);

@@ -1,3 +1,6 @@
+// This function will eventually validate data passed to the
+// endpoint to create a user
+
 function isUserValid(user){
   console.log('user Validity check.');
 

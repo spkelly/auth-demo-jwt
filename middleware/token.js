@@ -19,14 +19,10 @@ function verifyJWT(req, res, next){
 async function signAndSendToken(req,res,next){
   let tokenInfo = res.locals.tokenInfo;
 
-
-  console.log('made id', tokenInfo);
   if(!tokenInfo){
-    console.log('no token info', tokenInfo);
     next('an error has occured');
   } 
-
-  let token = jwt.sign(tokenInfo,
+  jwt.sign(tokenInfo,
     process.env.JWT_SECRET,{},
     (err,encoded)=>{
       if(err){
@@ -36,7 +32,8 @@ async function signAndSendToken(req,res,next){
       res.json({
         token:encoded
       });
-    })
+    }
+  );
 }
 
 
